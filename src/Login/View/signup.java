@@ -2,7 +2,16 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package Login;
+package Login.View;
+
+import Login.View.homepage2;
+import Login.View.Login;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -221,25 +230,85 @@ public class signup extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        Homepage2 Homepage2Frame = new homepage2();
-        Homepage2Frame.setVisible(true);
-        Homepage2Frame.pack();
-        Homepage2Frame.setLocationRelativeTo(null);
-        this.dispose();
-    }//GEN-LAST:event_jButton1ActionPerformed
+   private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+    String firstName = jTextField1.getText().trim();
+    String lastName = jTextField2.getText().trim();
+    String email = jTextField3.getText().trim();
+    String phoneNumber = jTextField4.getText().trim();
+    String password = new String(jPasswordField1.getPassword()).trim();
+    String confirmPassword = new String(jPasswordField2.getPassword()).trim();
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        Login LoginFrame = new Login();
-        LoginFrame.setVisible(true);
-        LoginFrame.pack();
-        LoginFrame.setLocationRelativeTo(null);
-        this.dispose();
-    }//GEN-LAST:event_jButton2ActionPerformed
+    // Check if any field is empty
+    if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || phoneNumber.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+        JOptionPane.showMessageDialog(null, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+    
+    // Validate first name and last name to contain only letters
+    if (!firstName.matches("[a-zA-Z]+")) {
+        JOptionPane.showMessageDialog(null, "First name should only contain letters!", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
 
-    /**
-     * @param args the command line arguments
-     */
+    if (!lastName.matches("[a-zA-Z]+")) {
+        JOptionPane.showMessageDialog(null, "Last name should only contain letters!", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // Validate phone number to contain only digits
+    if (!phoneNumber.matches("\\d+")) {
+        JOptionPane.showMessageDialog(null, "Phone number should only contain numbers!", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+    
+    // Validate email format
+    if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        JOptionPane.showMessageDialog(null, "Invalid email format!", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // Check if passwords match
+    if (!password.equals(confirmPassword)) {
+        JOptionPane.showMessageDialog(null, "Passwords do not match!", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // Store data in the database
+    try {
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/carbuyandsell", "root", "");
+        String sql = "INSERT INTO users (first_name, last_name, email, phone_number, password) VALUES (?, ?, ?, ?, ?)";
+        PreparedStatement preparedStatement = conn.prepareStatement(sql);
+        preparedStatement.setString(1, firstName);
+        preparedStatement.setString(2, lastName);
+        preparedStatement.setString(3, email);
+        preparedStatement.setString(4, phoneNumber);
+        preparedStatement.setString(5, password);
+
+        int rowsInserted = preparedStatement.executeUpdate();
+        if (rowsInserted > 0) {
+            int response = JOptionPane.showConfirmDialog(null, "You are registered successfully! Do you want to go to the login page?", "Registration Success", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+            if (response == JOptionPane.YES_OPTION) {
+                Login loginFrame = new Login();
+                loginFrame.setVisible(true);
+                loginFrame.pack();
+                loginFrame.setLocationRelativeTo(null);
+                this.dispose();
+            }
+        }
+
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+    }
+} 
+                                      
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {                                         
+        Login loginFrame = new Login();
+        loginFrame.setVisible(true);
+        loginFrame.pack();
+        loginFrame.setLocationRelativeTo(null);
+        this.dispose();
+    }                                        
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">

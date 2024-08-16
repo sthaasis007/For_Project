@@ -2,7 +2,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-package Login;
+package Login.View;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.swing.JOptionPane;
 
@@ -51,7 +57,7 @@ public class Login extends javax.swing.JFrame {
         jLabel1.setText("Welcome Back!!!");
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabel2.setText("Username");
+        jLabel2.setText("Email");
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel3.setText("Password");
@@ -185,14 +191,50 @@ public class Login extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void bsigninActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bsigninActionPerformed
-        Homepage2 Homepage2Frame = new Homepage2();
-        Homepage2Frame.setVisible(true);
-        Homepage2Frame.pack();
-        Homepage2Frame.setLocationRelativeTo(null);
-        this.dispose();
+    private void bsigninActionPerformed(java.awt.event.ActionEvent evt) {                                        
+    String email = username.getText().trim();
+    String pwd = new String(password.getPassword()).trim();
+
+    // Check if email and password fields are not empty
+    if (email.isEmpty() || pwd.isEmpty()) {
+        JOptionPane.showMessageDialog(null, "Please fill in both email and password!", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // Validate email format
+    if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        JOptionPane.showMessageDialog(null, "Invalid email format!", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // Verify email and password against the database
+    try {
+        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/carbuyandsell", "root", "");
+        String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+        PreparedStatement preparedStatement = conn.prepareStatement(sql);
+        preparedStatement.setString(1, email);
+        preparedStatement.setString(2, pwd);
         
-    }//GEN-LAST:event_bsigninActionPerformed
+        ResultSet resultSet = preparedStatement.executeQuery();
+        
+        if (resultSet.next()) {
+            // Login successful, redirect to homepage
+            homepage2 homepage2Frame = new homepage2();
+            homepage2Frame.setVisible(true);
+            homepage2Frame.pack();
+            homepage2Frame.setLocationRelativeTo(null);
+            this.dispose();
+        } else {
+            // Login failed
+            JOptionPane.showMessageDialog(null, "Invalid email or password!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(null, "An error occurred while trying to log in!", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}                                       
+
 
     private void jshow_passwordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jshow_passwordActionPerformed
     if  (jshow_password.isSelected()){
